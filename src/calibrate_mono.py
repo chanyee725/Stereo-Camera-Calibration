@@ -13,7 +13,8 @@ import cv2
 import numpy as np
 
 from utils.board import build_board, detect, to_points
-from utils.config import DEFAULT_CONFIG, load_config
+from utils.config import load_config
+from utils.constants import DEFAULT_CONFIG
 from utils.metrics import COVERAGE_GRID, coverage_ratio
 from utils.session import latest_session, list_images
 

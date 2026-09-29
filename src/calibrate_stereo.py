@@ -16,7 +16,8 @@ import numpy as np
 
 from utils.board import build_board, detect, to_points
 from utils.calib_io import read_intrinsics
-from utils.config import DEFAULT_CONFIG, load_config
+from utils.config import load_config
+from utils.constants import DEFAULT_CONFIG
 from utils.metrics import rectified_y_error
 from utils.session import latest_session, read_pairs
 

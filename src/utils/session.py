@@ -5,12 +5,7 @@ from pathlib import Path
 
 import cv2
 
-from utils.config import ROOT
-
-OUTPUT_ROOT = ROOT / "outputs"
-IMAGE_DIRS = ("left", "right")
-# Left and right are numbered independently, so stereo pairs are recorded here
-PAIRS_FILE = "pairs.csv"
+from utils.constants import IMAGE_DIRS, OUTPUT_ROOT, PAIRS_FILE
 
 
 def latest_session() -> Path:

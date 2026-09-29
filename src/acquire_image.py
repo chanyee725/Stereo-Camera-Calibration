@@ -24,14 +24,10 @@ import cv2
 import numpy as np
 
 from utils.board import build_board, detect
-from utils.config import DEFAULT_CONFIG, load_config
-from utils.session import (
-    OUTPUT_ROOT,
-    append_pair,
-    last_index,
-    latest_session,
-    save_image,
-)
+from utils.config import load_config
+from utils.constants import DEFAULT_CONFIG, GREEN, IMAGE_DIRS, OUTPUT_ROOT, RED
+from utils.draw import draw_label
+from utils.session import append_pair, last_index, latest_session, save_image
 
 WINDOW_NAME = "stereo"
 
@@ -122,7 +118,7 @@ def main():
             raise FileNotFoundError(f"Session not found: {session_dir}")
 
     # Continue numbering after the images already in the session
-    counts = {side: last_index(session_dir / side) for side in ("left", "right")}
+    counts = {side: last_index(session_dir / side) for side in IMAGE_DIRS}
     action = "Resuming" if args.resume else "New"
     print(f"{action} session: {session_dir} (last index: {counts})")
 
@@ -130,7 +126,7 @@ def main():
     detector = cv2.aruco.CharucoDetector(build_board(cfg["calibration"]))
     min_corners = cfg["calibration"].get("min_corners", 6)
     camera = StereoCamera(cfg["camera"])
-    status, status_color = "", (0, 255, 0)
+    status, status_color = "", GREEN
 
     try:
         while True:
@@ -144,26 +140,14 @@ def main():
             else:
                 right_view = right
             preview = np.hstack((left, right_view))
-            cv2.putText(
+            draw_label(
                 preview,
                 f"left: {counts['left']}  right: {counts['right']}  "
                 "[s] pair [l] left [r] right [q] quit",
-                (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
-                (0, 255, 0),
-                2,
+                color=GREEN,
             )
             if status:
-                cv2.putText(
-                    preview,
-                    status,
-                    (10, 60),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    0.6,
-                    status_color,
-                    2,
-                )
+                draw_label(preview, status, (10, 60), status_color, scale=0.6)
             cv2.imshow(WINDOW_NAME, preview)
 
             key = cv2.waitKey(1) & 0xFF
@@ -195,7 +179,7 @@ def main():
                         messages.append(f"pair not recorded ({common} common)")
                         ok = False
                 status = ", ".join(messages)
-                status_color = (0, 255, 0) if ok else (0, 0, 255)
+                status_color = GREEN if ok else RED
                 print(status)
     finally:
         camera.release()

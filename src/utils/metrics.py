@@ -3,7 +3,7 @@
 import cv2
 import numpy as np
 
-COVERAGE_GRID = (8, 6)
+from utils.constants import COVERAGE_GRID
 
 
 def coverage_ratio(points, image_size) -> float:
