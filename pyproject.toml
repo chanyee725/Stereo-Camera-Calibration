@@ -1,0 +1,22 @@
+[project]
+name = "calibration"
+version = "0.1.0"
+description = "Stereo camera calibration"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "opencv-python",
+    "pyyaml",
+]
+
+[dependency-groups]
+dev = [
+    "black",
+]
+
+[tool.uv]
+package = false
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
