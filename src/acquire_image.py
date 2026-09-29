@@ -23,14 +23,14 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from charuco import (
-    DEFAULT_CONFIG,
+from utils.board import build_board, detect
+from utils.config import DEFAULT_CONFIG, load_config
+from utils.session import (
     OUTPUT_ROOT,
     append_pair,
-    build_board,
-    detect,
+    last_index,
     latest_session,
-    load_config,
+    save_image,
 )
 
 WINDOW_NAME = "stereo"
@@ -96,18 +96,6 @@ class StereoCamera:
         for cap in self.caps:
             cap.release()
         self.caps = []
-
-
-def save_image(directory: Path, index: int, image) -> str:
-    directory.mkdir(parents=True, exist_ok=True)
-    name = f"{index:02d}.png"
-    cv2.imwrite(str(directory / name), image)
-    return name
-
-
-def last_index(directory: Path) -> int:
-    indices = [int(p.stem) for p in directory.glob("*.png") if p.stem.isdigit()]
-    return max(indices, default=0)
 
 
 def main():

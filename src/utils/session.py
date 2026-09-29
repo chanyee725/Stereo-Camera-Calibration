@@ -1,23 +1,16 @@
-"""Shared helpers for the ChArUco calibration scripts."""
+"""Capture session layout: image folders, numbering and stereo pair records."""
 
 import csv
 from pathlib import Path
 
 import cv2
-import numpy as np
-import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = ROOT / "configs" / "config.yaml"
+from utils.config import ROOT
+
 OUTPUT_ROOT = ROOT / "outputs"
 IMAGE_DIRS = ("left", "right")
 # Left and right are numbered independently, so stereo pairs are recorded here
 PAIRS_FILE = "pairs.csv"
-
-
-def load_config(path: Path) -> dict:
-    with open(path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
 
 
 def latest_session() -> Path:
@@ -37,6 +30,18 @@ def latest_session() -> Path:
 
 def list_images(directory: Path) -> list:
     return sorted(directory.glob("*.png"))
+
+
+def last_index(directory: Path) -> int:
+    indices = [int(p.stem) for p in directory.glob("*.png") if p.stem.isdigit()]
+    return max(indices, default=0)
+
+
+def save_image(directory: Path, index: int, image) -> str:
+    directory.mkdir(parents=True, exist_ok=True)
+    name = f"{index:02d}.png"
+    cv2.imwrite(str(directory / name), image)
+    return name
 
 
 def append_pair(session: Path, left_name: str, right_name: str):
@@ -59,31 +64,3 @@ def read_pairs(session: Path) -> list:
     return [
         (session / "left" / r["left"], session / "right" / r["right"]) for r in rows
     ]
-
-
-def build_board(cfg: dict):
-    dictionary = cv2.aruco.getPredefinedDictionary(
-        getattr(cv2.aruco, cfg["aruco_dict"])
-    )
-    return cv2.aruco.CharucoBoard(
-        (cfg["squares_x"], cfg["squares_y"]),
-        cfg["square_size_mm"],
-        cfg["marker_size_mm"],
-        dictionary,
-    )
-
-
-def detect(detector, image) -> dict:
-    """Return {corner_id: (x, y)} for the ChArUco corners found in the image."""
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    corners, ids, _, _ = detector.detectBoard(gray)
-    if ids is None:
-        return {}
-    return {int(i): c for i, c in zip(ids.flatten(), corners.reshape(-1, 2))}
-
-
-def to_points(board, detection: dict, ids=None):
-    ids = sorted(detection) if ids is None else ids
-    obj = board.getChessboardCorners()[ids].astype(np.float32)
-    img = np.array([detection[i] for i in ids], dtype=np.float32)
-    return obj, img

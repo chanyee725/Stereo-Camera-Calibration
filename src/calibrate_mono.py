@@ -12,24 +12,10 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from charuco import (
-    DEFAULT_CONFIG,
-    build_board,
-    detect,
-    latest_session,
-    list_images,
-    load_config,
-    to_points,
-)
-
-COVERAGE_GRID = (8, 6)
-
-
-def coverage_ratio(points, image_size) -> float:
-    w, h = image_size
-    gx, gy = COVERAGE_GRID
-    cells = {(int(x * gx / w), int(y * gy / h)) for x, y in points}
-    return len(cells) / (gx * gy)
+from utils.board import build_board, detect, to_points
+from utils.config import DEFAULT_CONFIG, load_config
+from utils.metrics import COVERAGE_GRID, coverage_ratio
+from utils.session import latest_session, list_images
 
 
 def draw_coverage(image, points, image_size, ratio):

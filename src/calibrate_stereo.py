@@ -14,36 +14,11 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from charuco import (
-    DEFAULT_CONFIG,
-    build_board,
-    detect,
-    latest_session,
-    load_config,
-    read_pairs,
-    to_points,
-)
-
-
-def read_intrinsics(path: Path):
-    if not path.exists():
-        raise FileNotFoundError(f"{path} not found, run calibrate_mono.py first")
-    fs = cv2.FileStorage(str(path), cv2.FILE_STORAGE_READ)
-    K = fs.getNode("K").mat()
-    D = fs.getNode("D").mat()
-    size = (
-        int(fs.getNode("image_width").real()),
-        int(fs.getNode("image_height").real()),
-    )
-    fs.release()
-    return K, D, size
-
-
-def rectified_y_error(pts_l, pts_r, K1, D1, R1, P1, K2, D2, R2, P2) -> np.ndarray:
-    """Vertical offset in pixels between matching corners after rectification."""
-    rect_l = cv2.undistortPoints(pts_l.reshape(-1, 1, 2), K1, D1, R=R1, P=P1)
-    rect_r = cv2.undistortPoints(pts_r.reshape(-1, 1, 2), K2, D2, R=R2, P=P2)
-    return np.abs(rect_l[:, 0, 1] - rect_r[:, 0, 1])
+from utils.board import build_board, detect, to_points
+from utils.calib_io import read_intrinsics
+from utils.config import DEFAULT_CONFIG, load_config
+from utils.metrics import rectified_y_error
+from utils.session import latest_session, read_pairs
 
 
 def main():
